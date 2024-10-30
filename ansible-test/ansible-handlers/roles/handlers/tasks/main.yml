@@ -1,0 +1,19 @@
+--- 
+- name: Update apt cache and install Nginx 
+  apt:
+    name: nginx
+    state: latest
+    update_cache: yes
+  notify: Restart Nginx
+  
+- name: Copy index.html
+  template: 
+    src: index.html 
+    dest: /var/www/html/index.nginx-debian.html 
+  notify: Restart Nginx
+
+- name: Copy updated.html
+  template: 
+    src: updated.html 
+    dest: /var/www/html/index.nginx-debian.html 
+  notify: Restart Nginx

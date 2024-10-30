@@ -1,0 +1,4 @@
+---
+vars_from_vars_yml: "This is variable value is coming from my-vars.yml file"
+other_variable: "foo"
+version: "20.0"

@@ -1,0 +1,7 @@
+---
+- name: EC2 Key Pair
+  hosts: all
+  connection: local
+  gather_facts: False
+  roles:
+    - keypair

@@ -1,0 +1,16 @@
+---
+- name: EC2 key example
+  amazon.aws.ec2_key:
+    name: my_keypair
+    region: us-east-1
+  register: keyout
+    # no_log: true
+
+- debug:
+    var: keyout
+
+- name: store login key
+  copy:
+    content: "{{keyout.key.private_key}}"
+    dest: ./sample-key.pem
+  when: keyout.changed
