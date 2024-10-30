@@ -1,0 +1,15 @@
+---
+- name: Import VPC Variables
+  include_vars: vars/vpc_vars.yml
+
+- name: Create japp VPC
+  amazon.aws.ec2_vpc_net:
+    name: "{{ vpc_name }}"
+    cidr_block: "{{ vpc_cidr }}"
+    region: "{{ region }}"
+    state: "{{ state }}"
+    tenancy: default
+    tags: 
+      ManagedBy: ansible
+  register: vpcout
+    # no_log: true
