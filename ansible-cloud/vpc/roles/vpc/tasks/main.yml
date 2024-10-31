@@ -23,11 +23,12 @@
     vpc_id: "{{ vpcout.vpc.id }}"
     cidr: "{{ PubSub1Cidr }}"
     region: "{{ region }}"
+    az: "{{ zone1 }}"
     map_public: true
     tags:
       Name: Public Subnet - 1
       ManagedBy: Ansible
-  register: subnetzone1_out
+  register: pubsub1_out
 
 # - debug:
 #     var: subnetzone1_out
@@ -38,11 +39,12 @@
     vpc_id: "{{ vpcout.vpc.id }}"
     cidr: "{{ PubSub2Cidr }}"
     region: "{{ region }}"
+    az: "{{ zone2 }}"
     map_public: true
     tags:
       Name: Public Subnet - 2
       ManagedBy: Ansible
-  register: subnetzone2_out
+  register: pubsub2_out
 
 - name: Create vpc public subnet in Zone 3
   amazon.aws.ec2_vpc_subnet:
@@ -50,8 +52,45 @@
     vpc_id: "{{ vpcout.vpc.id }}"
     cidr: "{{ PubSub3Cidr }}"
     region: "{{ region }}"
+    az: "{{ zone3 }}"
     map_public: true
     tags:
       Name: Public Subnet - 3
       ManagedBy: Ansible
-  register: subnetzone3_out
+  register: pubsub3_out
+
+- name: Create vpc private subnet in Zone 1
+  amazon.aws.ec2_vpc_subnet:
+    state: "{{ state }}"
+    vpc_id: "{{ vpcout.vpc.id }}"
+    cidr: "{{ PrivSub1Cidr }}"
+    region: "{{ region }}"
+    az: "{{ zone1 }}"
+    tags:
+      Name: Private Subnet - 1
+      ManagedBy: Ansible
+  register: privsub1_out
+
+- name: Create vpc private subnet in Zone 2
+  amazon.aws.ec2_vpc_subnet:
+    state: "{{ state }}"
+    vpc_id: "{{ vpcout.vpc.id }}"
+    cidr: "{{ PrivSub2Cidr }}"
+    region: "{{ region }}"
+    az: "{{ zone2 }}"
+    tags:
+      Name: Private Subnet - 2
+      ManagedBy: Ansible
+  register: privsub2_out
+
+- name: Create vpc private subnet in Zone 3
+  amazon.aws.ec3_vpc_subnet:
+    state: "{{ state }}"
+    vpc_id: "{{ vpcout.vpc.id }}"
+    cidr: "{{ PrivSub3Cidr }}"
+    region: "{{ region }}"
+    az: "{{ zone3 }}"
+    tags:
+      Name: Private Subnet - 3
+      ManagedBy: Ansible
+  register: privsub3_out
