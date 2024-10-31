@@ -22,8 +22,12 @@
     state: "{{ state }}"
     vpc_id: "{{ vpcout.vpc.id }}"
     cidr: "{{ PubSub1Cidr }}"
+    region: "{{ region }}"
     map_public: true
     tags:
       Name: Public Subnet - 1
       ManagedBy: Ansible
   register: subnetzone1_out
+
+- debug:
+    var: subnetzone1_out
