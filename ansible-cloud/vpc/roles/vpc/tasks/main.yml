@@ -29,5 +29,29 @@
       ManagedBy: Ansible
   register: subnetzone1_out
 
-- debug:
-    var: subnetzone1_out
+# - debug:
+#     var: subnetzone1_out
+
+- name: Create vpc public subnet in Zone 2
+  amazon.aws.ec2_vpc_subnet:
+    state: "{{ state }}"
+    vpc_id: "{{ vpcout.vpc.id }}"
+    cidr: "{{ PubSub2Cidr }}"
+    region: "{{ region }}"
+    map_public: true
+    tags:
+      Name: Public Subnet - 2
+      ManagedBy: Ansible
+  register: subnetzone2_out
+
+- name: Create vpc public subnet in Zone 3
+  amazon.aws.ec2_vpc_subnet:
+    state: "{{ state }}"
+    vpc_id: "{{ vpcout.vpc.id }}"
+    cidr: "{{ PubSub3Cidr }}"
+    region: "{{ region }}"
+    map_public: true
+    tags:
+      Name: Public Subnet - 3
+      ManagedBy: Ansible
+  register: subnetzone3_out
