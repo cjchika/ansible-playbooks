@@ -84,7 +84,7 @@
   register: privsub2_out
 
 - name: Create vpc private subnet in Zone 3
-  amazon.aws.ec3_vpc_subnet:
+  amazon.aws.ec2_vpc_subnet:
     state: "{{ state }}"
     vpc_id: "{{ vpcout.vpc.id }}"
     cidr: "{{ PrivSub3Cidr }}"
