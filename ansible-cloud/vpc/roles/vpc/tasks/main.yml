@@ -94,3 +94,12 @@
       Name: Private Subnet - 3
       ManagedBy: Ansible
   register: privsub3_out
+
+- name: Create Internet gateway with tags
+  amazon.aws.ec2_vpc_igw:
+    vpc_id: "{{ vpcout.vpc.id }}"
+    state: "{{ state }}"
+    tags:
+      Name: "{{ vpcout.vpc.name }} - IGW" 
+      ManagedBy: Ansible
+  register: igwout
