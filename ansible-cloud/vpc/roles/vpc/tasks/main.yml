@@ -104,3 +104,21 @@
       Name: "{{ vpcout.vpc.name }} - IGW" 
       ManagedBy: Ansible
   register: igwout
+
+- name: Set up public subnet route table
+  amazon.aws.ec2_vpc_route_table:
+    vpc_id: "{{ vpcout.vpc.id }}"
+    region: "{{ region }}"
+    tags:
+      Name: "{{ vpcout.vpc.name }} - Public-RT"
+      ManagedBy: Ansible
+    subnets:
+      - "{{ pubsub1_out.subnet.id }}"
+      - "{{ pubsub2_out.subnet.id }}"
+      - "{{ pubsub3_out.subnet_id }}"
+    routes:
+      - dest: 0.0.0.0/0
+        gateway_id: "{{ igwout.gateway_id }}"
+      - dest: ::/0
+        gateway_id: "{{ igwout.gateway_id }}"
+  register: prtout
