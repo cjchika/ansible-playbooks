@@ -10,6 +10,20 @@
     state: "{{ state }}"
     tenancy: default
     tags: 
-      ManagedBy: ansible
+      ManagedBy: Ansible
   register: vpcout
     # no_log: true
+
+- debug:
+    var: vpcout
+
+- name: Create vpc public subnet in Zone 1
+  amazon.aws.ec2_vpc_subnet:
+    state: "{{ state }}"
+    vpc_id: "{{ vpcout.vpc.id }}"
+    cidr: "{{ PubSub1Cidr }}"
+    map_public: true
+    tags:
+      Name: Public Subnet - 1
+      ManagedBy: Ansible
+  register: subnetzone1_out
