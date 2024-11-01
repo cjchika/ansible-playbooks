@@ -1,0 +1,6 @@
+---
+- name: Import VPC Output Variables
+  include_vars: vars/output_vars.yml
+
+- name: Import VPC Variables
+  include_vars: vars/vpc_vars.yml

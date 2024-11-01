@@ -1,0 +1,9 @@
+---
+- name: EC2 VPC
+  hosts: all
+  connection: local
+  gather_facts: False
+  roles:
+    - vpc
+    - bation
+    - japp

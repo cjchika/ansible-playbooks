@@ -1,0 +1,181 @@
+---
+- name: Import VPC Variables
+  include_vars: vars/vpc_vars.yml
+
+- name: Create japp VPC
+  amazon.aws.ec2_vpc_net:
+    name: "{{ vpc_name }}"
+    cidr_block: "{{ vpc_cidr }}"
+    region: "{{ region }}"
+    state: "{{ state }}"
+    tenancy: default
+    tags: 
+      ManagedBy: Ansible
+  register: vpcout
+    # no_log: true
+
+# - debug:
+#     var: vpcout
+
+- name: Create vpc public subnet in Zone 1
+  amazon.aws.ec2_vpc_subnet:
+    state: "{{ state }}"
+    vpc_id: "{{ vpcout.vpc.id }}"
+    cidr: "{{ PubSub1Cidr }}"
+    region: "{{ region }}"
+    az: "{{ zone1 }}"
+    map_public: true
+    tags:
+      Name: Public Subnet - 1
+      ManagedBy: Ansible
+  register: pubsub1_out
+
+# - debug:
+#     var: subnetzone1_out
+
+- name: Create vpc public subnet in Zone 2
+  amazon.aws.ec2_vpc_subnet:
+    state: "{{ state }}"
+    vpc_id: "{{ vpcout.vpc.id }}"
+    cidr: "{{ PubSub2Cidr }}"
+    region: "{{ region }}"
+    az: "{{ zone2 }}"
+    map_public: true
+    tags:
+      Name: Public Subnet - 2
+      ManagedBy: Ansible
+  register: pubsub2_out
+
+- name: Create vpc public subnet in Zone 3
+  amazon.aws.ec2_vpc_subnet:
+    state: "{{ state }}"
+    vpc_id: "{{ vpcout.vpc.id }}"
+    cidr: "{{ PubSub3Cidr }}"
+    region: "{{ region }}"
+    az: "{{ zone3 }}"
+    map_public: true
+    tags:
+      Name: Public Subnet - 3
+      ManagedBy: Ansible
+  register: pubsub3_out
+
+- name: Create vpc private subnet in Zone 1
+  amazon.aws.ec2_vpc_subnet:
+    state: "{{ state }}"
+    vpc_id: "{{ vpcout.vpc.id }}"
+    cidr: "{{ PrivSub1Cidr }}"
+    region: "{{ region }}"
+    az: "{{ zone1 }}"
+    tags:
+      Name: Private Subnet - 1
+      ManagedBy: Ansible
+  register: privsub1_out
+
+- name: Create vpc private subnet in Zone 2
+  amazon.aws.ec2_vpc_subnet:
+    state: "{{ state }}"
+    vpc_id: "{{ vpcout.vpc.id }}"
+    cidr: "{{ PrivSub2Cidr }}"
+    region: "{{ region }}"
+    az: "{{ zone2 }}"
+    tags:
+      Name: Private Subnet - 2
+      ManagedBy: Ansible
+  register: privsub2_out
+
+- name: Create vpc private subnet in Zone 3
+  amazon.aws.ec2_vpc_subnet:
+    state: "{{ state }}"
+    vpc_id: "{{ vpcout.vpc.id }}"
+    cidr: "{{ PrivSub3Cidr }}"
+    region: "{{ region }}"
+    az: "{{ zone3 }}"
+    tags:
+      Name: Private Subnet - 3
+      ManagedBy: Ansible
+  register: privsub3_out
+
+- name: Create Internet gateway with tags
+  amazon.aws.ec2_vpc_igw:
+    vpc_id: "{{ vpcout.vpc.id }}"
+    region: "{{ region }}"
+    state: "{{ state }}"
+    tags:
+      Name: "{{ vpcout.vpc.name }} - IGW" 
+      ManagedBy: Ansible
+  register: igwout
+
+- name: Set up public subnet route table
+  amazon.aws.ec2_vpc_route_table:
+    vpc_id: "{{ vpcout.vpc.id }}"
+    region: "{{ region }}"
+    tags:
+      Name: "{{ vpcout.vpc.name }} - Public-RT"
+      ManagedBy: Ansible
+    subnets:
+      - "{{ pubsub1_out.subnet.id }}"
+      - "{{ pubsub2_out.subnet.id }}"
+      - "{{ pubsub3_out.subnet.id }}"
+    routes:
+      - dest: 0.0.0.0/0
+        gateway_id: "{{ igwout.gateway_id }}"
+      - dest: ::/0
+        gateway_id: "{{ igwout.gateway_id }}"
+  register: pubRTout
+
+- name: Create new nat gateway and allocate new EIP if a nat gateway does not yet exist in the subnet.
+  amazon.aws.ec2_vpc_nat_gateway:
+    state: "{{ state }}"
+    subnet_id: "{{ pubsub1_out.subnet.id }}"
+    wait: true
+    region: "{{ region }}"
+    if_exist_do_not_create: true
+  register: natgw_out
+
+- name: Set up private subnet route table
+  amazon.aws.ec2_vpc_route_table:
+    vpc_id: "{{ vpcout.vpc.id }}"
+    region: "{{ region }}"
+    tags:
+      Name: "{{ vpcout.vpc.name }} - Priv-RT"
+      ManagedBy: Ansible
+    subnets:
+      - "{{ privsub1_out.subnet.id }}"
+      - "{{ privsub2_out.subnet.id }}"
+      - "{{ privsub3_out.subnet.id }}"
+    routes:
+      - dest: 0.0.0.0/0
+        gateway_id: "{{ natgw_out.gateway_id }}"
+      - dest: ::/0
+        gateway_id: "{{ natgw_out.gateway_id }}"
+  register: privRTout
+
+- debug:
+    var: "{{item}}"
+  loop:
+    - vpcout.vpc.id
+    - pubsub1_out.subnet.id
+    - pubsub2_out.subnet.id
+    - pubsub3_out.subnet.id
+    - privsub1_out.subnet.id
+    - privsub2_out.subnet.id
+    - privsub3_out.subnet.id
+    - igwout.gateway_id
+    - pubRTout.route_table.id
+
+- set_fact:
+  vpcid: "{{vpcout.vpc.id}}"
+  pubsub1id: "{{pubsub1_out.subnet.id}}"
+  pubsub2id: "{{pubsub2_out.subnet.id}}"
+  pubsub3id: "{{pubsub3_out.subnet.id}}"
+  privsub1id: "{{privsub1_out.subnet.id}}"
+  privsub2id: "{{privsub2_out.subnet.id}}"
+  privsub3id: "{{privsub3_out.subnet.id}}"
+  igwout: "{{igw.gateway_id}}"
+  pubRTid: "{{pubRTout.route_table.id}}"
+  cachable: yes
+
+- name: Create variables file for vpc output
+  copy:
+    content: "vpcid: {{vpcout.vpc.id}}\npubsub1id: {{pubsub1_out.subnet.id}}\npubsub2id: {{pubsub2_out.subnet.id}}\npubsub3id: {{pubsub3_out.subnet.id}}\nprivsub1id: {{privsub1_out.subnet.id}}\nprivsub2id: {{privsub2_out.subnet.id}}\nprivsub3id: {{privsub3_out.subnet.id}}\nigwout: {{igw.gateway_id}}\npubRTid: {{pubRTout.route_table.id}}"
+    dest: vars/output_vars.yml
