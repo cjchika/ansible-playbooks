@@ -4,3 +4,66 @@
 
 - name: Import VPC Variables
   include_vars: vars/vpc_vars.yml
+
+- name: Import Stack Variables
+  include_vars: vars/stack_vars.yml
+
+- name: Create japp EC2 key
+  amazon.aws.ec2_key:
+    name: japp-key
+    region: "{{region}}"
+  register: jappkey_out
+
+- debug:
+    var: jappkey_out
+
+- name: Save private key in a file japp.pem
+  copy:
+    content: "{{jappkey_out.key.private_key}}"
+    dest: ./bation-key.pem
+    mode: 0600
+  when: jappkey_out.changed
+
+- name: Create Security Group for Load Balancer
+  amazon.aws.ec2_security_group:
+    name: "jappELBSG"
+    description: Allows port 80 from everywhere and all port within sg
+    region: "{{region}}"
+    vpc_id: "{{vpcid}}"
+    rules:
+      - proto: tcp
+        ports:
+          - 80
+        cidr_ip: 0.0.0.0/0
+        rule_desc: allow port 80 from everywhere
+    register: jappELBSG_out
+
+- name: Create Security Group for japp stack
+  amazon.aws.ec2_security_group:
+    name: jappStackSG
+    description: Allows port 22 from everywhere and all port within sg
+    region: "{{region}}"
+    vpc_id: "{{vpcid}}"
+    purge_rules: false
+    rules:
+      - proto: tcp
+        from_port: 80
+        to_port: 80
+        group_id: "{{jappELBSG_out.group_id}}"
+
+      - proto: tcp
+        from_port: 22
+        to_port: 22
+        group_id: "{{bastionSGid}}"
+    register: jappStackSG_out
+
+- name: Update Security Group with its own sd id
+  amazon.aws.ec2_security_group:
+    name: jappStackSG
+    description: Allows port 22 from everywhere and all port within sg
+    region: "{{region}}"
+    vpc_id: "{{vpcid}}"
+    purge_rules: false
+    rules:
+      - proto: all
+        group_id: "{{jappStackSG_out.group_id}}"

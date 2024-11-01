@@ -162,6 +162,8 @@
     - privsub3_out.subnet.id
     - igwout.gateway_id
     - pubRTout.route_table.id
+    - natgw_out.gateway_id
+    - privRTout.route_table.id
 
 - set_fact:
   vpcid: "{{vpcout.vpc.id}}"
@@ -173,9 +175,11 @@
   privsub3id: "{{privsub3_out.subnet.id}}"
   igwout: "{{igw.gateway_id}}"
   pubRTid: "{{pubRTout.route_table.id}}"
+  natgw_out: "{{natgw_out.gateway_id}}"
+  privRTout: "{{privRTout.route_table.id}}"
   cachable: yes
 
 - name: Create variables file for vpc output
   copy:
-    content: "vpcid: {{vpcout.vpc.id}}\npubsub1id: {{pubsub1_out.subnet.id}}\npubsub2id: {{pubsub2_out.subnet.id}}\npubsub3id: {{pubsub3_out.subnet.id}}\nprivsub1id: {{privsub1_out.subnet.id}}\nprivsub2id: {{privsub2_out.subnet.id}}\nprivsub3id: {{privsub3_out.subnet.id}}\nigwout: {{igw.gateway_id}}\npubRTid: {{pubRTout.route_table.id}}"
+    content: "vpcid: {{vpcout.vpc.id}}\npubsub1id: {{pubsub1_out.subnet.id}}\npubsub2id: {{pubsub2_out.subnet.id}}\npubsub3id: {{pubsub3_out.subnet.id}}\nprivsub1id: {{privsub1_out.subnet.id}}\nprivsub2id: {{privsub2_out.subnet.id}}\nprivsub3id: {{privsub3_out.subnet.id}}\nigwid: {{igw.gateway_id}}\npubRTid: {{pubRTout.route_table.id}}\n  natgwid: {{natgw_out.gateway_id}}\nprivRTid: {{privRTout.route_table.id}}"
     dest: vars/output_vars.yml

@@ -2,9 +2,9 @@
 - name: Import VPC Variables
   include_vars: vars/output_vars.yml
 
-- name: Create japp EC2 key
+- name: Create bation EC2 key
   amazon.aws.ec2_key:
-    name: japp-key
+    name: bation-key
     region: "{{region}}"
   register: keyout
 
@@ -54,3 +54,20 @@
 
 - debug:
     var: bastionHostOut
+
+- name: Insert/Update "BastionSGid" in vars/output_vars.yml
+  blockinfile:
+    path: vars/output_vars.yml
+    backup: true
+    block:
+      bastionSGid: "{{bastionHostOut.group_id}}"
+
+
+# - set_fact:
+#   bastionSGid: "{{bastionHostOut.group_id}}"
+#   cachable: yes
+
+# - name: Create variables file for bastion output
+#   copy:
+#     content: "bastionSGid: {{bastionHostOut.group_id}}"
+#     dest: vars/bastion_output_vars.yml
