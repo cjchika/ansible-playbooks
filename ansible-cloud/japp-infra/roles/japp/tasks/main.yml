@@ -154,4 +154,47 @@
   register: db01_out
 
 - debug:
-    var: db01_out
+    var: db01_out.tagged_instances[0].id
+
+- amazon.aws.elb_application_lb:
+    name: "japp-elb"
+    security_groups:
+      - "{{jappELBSG_out.group_id}}"
+    subnets:
+      - "{{ pubsub1id }}"
+      - "{{ pubsub2id }}"
+      - "{{ pubsub3id }}"
+    # purge_instance_ids: true
+    listeners:
+      - Protocol: HTTP 
+        Port: 80 
+    state: present
+
+- name: Insert/Update Hosts IP & Name in file provision-stack/group_vars/hostsip.yml
+  blockinfile:
+    path: provision-stack/group_vars/hostsip.yml
+    block: |
+      web01_ip: "{{web01_out.tagged_instances[0].private_ip}}"
+      app01_ip: "{{app01_out.tagged_instances[0].private_ip}}"
+      rmq01_ip: "{{rmq01_out.tagged_instances[0].private_ip}}"
+      mc01_ip: "{{mc01_out.tagged_instances[0].private_ip}}"
+      db01_ip: "{{db01_out.tagged_instances[0].private_ip}}"
+
+- name: Copy login key to provision-stack directory
+  copy: 
+    src: japp-key.pem
+    dest: provision-stack/japp-key.pem
+    mode: "0400"
+
+- name: Insert/Update Hosts IP & Name in file provision-stack/group_vars/hostsip.yml
+  blockinfile:
+    path: provision-stack/group_vars/hostsip.yml
+    block: |
+      web01_ip: "{{web01_out.tagged_instances[0].private_ip}}"
+      app01_ip: "{{app01_out.tagged_instances[0].private_ip}}"
+      rmq01_ip: "{{rmq01_out.tagged_instances[0].private_ip}}"
+      mc01_ip: "{{mc01_out.tagged_instances[0].private_ip}}"
+      db01_ip: "{{db01_out.tagged_instances[0].private_ip}}"
+
+      [websrvgrp]
+      web01
