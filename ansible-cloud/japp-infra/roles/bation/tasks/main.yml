@@ -61,13 +61,3 @@
     backup: true
     block:
       bastionSGid: "{{bastionHostOut.group_id}}"
-
-
-# - set_fact:
-#   bastionSGid: "{{bastionHostOut.group_id}}"
-#   cachable: yes
-
-# - name: Create variables file for bastion output
-#   copy:
-#     content: "bastionSGid: {{bastionHostOut.group_id}}"
-#     dest: vars/bastion_output_vars.yml

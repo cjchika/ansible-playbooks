@@ -67,3 +67,91 @@
     rules:
       - proto: all
         group_id: "{{jappStackSG_out.group_id}}"
+
+- name: Create Nginx web01
+  amazon.aws.ec2_instance:
+    name: "Japp-Web01"
+    vpc_subnet_id: "{{privsub1id}}"
+    instance_type: t2.micro
+    security_group: "{{jappStackSG_out.group_id}}"
+    network_interfaces:
+      - assign_public_ip: true
+    image_id: "{{nginx_ami}}"
+    wait: true
+    wait_timeout: 400
+    tags:
+      ManagedBy: Ansible
+      Owner: DevOp
+    exact_count: 1
+  register: web01_out
+
+- name: Create Tomcat app01
+  amazon.aws.ec2_instance:
+    name: "Japp-App01"
+    vpc_subnet_id: "{{privsub1id}}"
+    instance_type: t2.micro
+    security_group: "{{jappStackSG_out.group_id}}"
+    network_interfaces:
+      - assign_public_ip: true
+    image_id: "{{tomcat_ami}}"
+    wait: true
+    wait_timeout: 400
+    tags:
+      ManagedBy: Ansible
+      Owner: DevOp
+    exact_count: 1
+  register: app01_out
+
+- name: Create Memcache mc01
+  amazon.aws.ec2_instance:
+    name: "Japp-mc01"
+    vpc_subnet_id: "{{privsub1id}}"
+    instance_type: t2.micro
+    security_group: "{{jappStackSG_out.group_id}}"
+    network_interfaces:
+      - assign_public_ip: true
+    image_id: "{{memcache_ami}}"
+    wait: true
+    wait_timeout: 400
+    tags:
+      ManagedBy: Ansible
+      Owner: DevOp
+    exact_count: 1
+  register: mc01_out
+
+- name: Create RabbitMq rmq01
+  amazon.aws.ec2_instance:
+    name: "Japp-Rmq01"
+    vpc_subnet_id: "{{privsub1id}}"
+    instance_type: t2.micro
+    security_group: "{{jappStackSG_out.group_id}}"
+    network_interfaces:
+      - assign_public_ip: true
+    image_id: "{{rmq_ami}}"
+    wait: true
+    wait_timeout: 400
+    tags:
+      ManagedBy: Ansible
+      Owner: DevOp
+    exact_count: 1
+  register: rmq01_out
+
+- name: Create MySQl db01
+  amazon.aws.ec2_instance:
+    name: "Japp-db01"
+    vpc_subnet_id: "{{privsub1id}}"
+    instance_type: t2.micro
+    security_group: "{{jappStackSG_out.group_id}}"
+    network_interfaces:
+      - assign_public_ip: true
+    image_id: "{{mysql_ami}}"
+    wait: true
+    wait_timeout: 400
+    tags:
+      ManagedBy: Ansible
+      Owner: DevOp
+    exact_count: 1
+  register: db01_out
+
+- debug:
+    var: db01_out
